@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import MainLayout from '../components/Layout/MainLayout';
 import TaskColumn from '../components/Tasks/TaskColumn';
-// import TaskDetail from '../components/Tasks/TaskDetail.tsx';
-// import TaskEditForm from '../components/Tasks/TaskEditForm';
+import TaskDetail from '../components/Tasks/TaskDetail.tsx';
+import TaskEditForm from '../components/Tasks/TaskEditForm';
 import { Task, TaskStatus, TaskPriority } from '../types/task';
 // import { useAuth } from '../context/AuthContext';
 // import { getTasks, updateTask } from '../services/taskService';
 import Button from '../components/UI/Button';
+import TaskCreateForm from '../components/Tasks/TaskCreateForm.tsx';
 
 const Home = () => {
   // const { authState } = useAuth();
@@ -16,6 +17,7 @@ const Home = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isTaskUpdating, setIsTaskUpdating] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
 
@@ -41,8 +43,10 @@ const Home = () => {
               lastName: "Solo",
               email: "test@email"
             },
-            createdAt: "",
-            updatedAt: ""
+            // createdAt: "",
+            // updatedAt: ""
+            "createdAt": "2025-03-23T04:11:20.203772",
+		        "updatedAt": "2025-03-23T04:11:20.203783",
           }
         ]
         setTasks(tasksData);
@@ -99,6 +103,29 @@ const Home = () => {
     // }
   };
 
+  const handleTaskCreate = async (
+    data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, startDate: Date, endDate: Date }
+  ) => {
+    // try {
+    //   setIsTaskUpdating(true);
+    //   const updatedTask = await updateTask(taskId, data);
+      
+    //   // Update tasks in state
+    //   setTasks((prevTasks) =>
+    //     prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
+    //   );
+      
+    //   // Close modal and update selected task
+    //   setIsEditModalOpen(false);
+    //   setSelectedTask(updatedTask);
+    // } catch (err) {
+    //   console.error('Failed to update task:', err);
+    //   alert('Failed to update task. Please try again.');
+    // } finally {
+    //   setIsTaskUpdating(false);
+    // }
+  };
+
   // Handle drag and drop
   const handleDropTask = async (taskId: string, newStatus: TaskStatus) => {
     try {
@@ -127,9 +154,10 @@ const Home = () => {
   // Placeholder for creating a new task
   const handleCreateTask = () => {
     setIsCreatingTask(true);
+    setIsCreateModalOpen(true)
     // In a real app, this would open a modal with a form
-    alert('Task creation would be implemented in a real application');
-    setIsCreatingTask(false);
+    // alert('Task creation would be implemented in a real application');
+    // setIsCreatingTask(false);
   };
 
   return (
@@ -178,22 +206,30 @@ const Home = () => {
       )}
 
       {/* Task detail modal */}
-      {/* <TaskDetail
+      <TaskDetail
         task={selectedTask}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onEdit={handleEditClick}
-        currentUserId={authState.user?.id}
-      /> */}
+        // currentUserId={authState.user?.id}
+        currentUserId={"2"}
+      />
 
       {/* Task edit modal */}
-      {/* <TaskEditForm
+      <TaskEditForm
         task={selectedTask}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleTaskUpdate}
         isLoading={isTaskUpdating}
-      /> */}
+      />
+
+      <TaskCreateForm
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreate={handleTaskCreate}
+        isLoading={isTaskUpdating}
+      />
     </MainLayout>
   );
 };
