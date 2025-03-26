@@ -1,64 +1,99 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MainLayout from '../components/Layout/MainLayout';
 import TaskColumn from '../components/Tasks/TaskColumn';
 import TaskDetail from '../components/Tasks/TaskDetail.tsx';
 import TaskEditForm from '../components/Tasks/TaskEditForm';
 import { Task, TaskStatus, TaskPriority } from '../types/task';
-// import { useAuth } from '../context/AuthContext';
-// import { getTasks, updateTask } from '../services/taskService';
+import { useAuth } from '../context/AuthContext';
+import { getTasks, updateTask, createTask } from '../services/taskService';
 import Button from '../components/UI/Button';
 import TaskCreateForm from '../components/Tasks/TaskCreateForm.tsx';
+import { User } from '../types/auth.ts';
+import { getUsers } from '../services/authService.ts';
+import TaskFilter from '../components/Tasks/TaskFilter.tsx';
 
 const Home = () => {
-  // const { authState } = useAuth();
+  const { authState } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noti, setNoti] = useState<string | null>(null);
+  const [refetch, setRefetch] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isTaskUpdating, setIsTaskUpdating] = useState(false);
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [isTaskCreating, setIsTaskCreating] = useState(false);
+  const [filters, setFilters] = useState<{
+    status?: TaskStatus | string;
+    priority?: TaskPriority | string;
+    owned_by_id?: string;
+    assigned_to?: string;
+    start_date?: string;
+    end_date?: string;
+  }>({});
+  const previousFilter = useRef<{
+    status?: TaskStatus | string;
+    priority?: TaskPriority | string;
+    owned_by_id?: string;
+    assigned_to?: string;
+    // date_range?: string
+    start_date?: string;
+    end_date?: string;
+  }>(null);
 
+  const fetchTasks = async (filters?: any) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const filterParam: Record<string, any> = {};
+      for(const key in filters) {
+        if(filters[key] !== undefined && filters[key] !== null && filters[key] !== ""){
+            filterParam[key] = filters[key];
+
+        }
+      }
+      if(filterParam.hasOwnProperty('start_date') && filterParam.hasOwnProperty('end_date')) {
+        filterParam['date_range'] = filterParam['start_date'] + ',' + filterParam['end_date']
+        delete filterParam['start_date'];
+        delete filterParam['end_date'];
+      }
+      // if(filters){
+      //   getTasks(filters)
+      // } else {
+      const tasksData = await getTasks(filterParam);
+      // }
+
+      setTasks(tasksData);
+    } catch (err) {
+      setError('Failed to load tasks. Please try again later.');
+      console.error(err);
+      setIsLoading(false)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  // Fetch users
+  const fetchUsers = async () => {
+    try {
+      const usersData = await getUsers(); // You'll need to create this service method
+      setUsers(usersData);
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    }
+  };
   // Fetch tasks on component mount
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        // const tasksData = await getTasks();
-        const tasksData : Task[] = [
-          {
-            id: "1",
-            title: "Bug",
-            description: "this is description",
-            status: "TODO",
-            priority: "LOW",
-            start_date: "",
-            end_date: "",
-            owned_by: {
-              id: "2",
-              firstName: "Han",
-              lastName: "Solo",
-              email: "test@email"
-            },
-            // createdAt: "",
-            // updatedAt: ""
-            "createdAt": "2025-03-23T04:11:20.203772",
-		        "updatedAt": "2025-03-23T04:11:20.203783",
-          }
-        ]
-        setTasks(tasksData);
-      } catch (err) {
-        setError('Failed to load tasks. Please try again later.');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTasks();
+    // Initial fetch
+    fetchUsers();
+    // if(refetch){
+    //   fetchTasks()
+    //   setRefetch(false)
+    // } else {
+      fetchTasks();
+    // }
   }, []);
 
   // Filter tasks by status
@@ -78,52 +113,62 @@ const Home = () => {
     setIsEditModalOpen(true);
   };
 
+  const handleFilterChange = (filterKey: string, filterValue: string) => {
+    // setFilters(newFilters);
+    setFilters((prevFilter) => ({
+      ...prevFilter,
+      [filterKey]: filterValue
+    }))
+  };
+
   // Handle task update
   const handleTaskUpdate = async (
     taskId: string,
-    data: { title: string; description: string; status: TaskStatus }
+    data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, start_date: Date | string, end_date: Date | string, assigned_to_id: string }
   ) => {
-    // try {
-    //   setIsTaskUpdating(true);
-    //   const updatedTask = await updateTask(taskId, data);
-      
-    //   // Update tasks in state
-    //   setTasks((prevTasks) =>
-    //     prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
-    //   );
-      
-    //   // Close modal and update selected task
-    //   setIsEditModalOpen(false);
-    //   setSelectedTask(updatedTask);
-    // } catch (err) {
-    //   console.error('Failed to update task:', err);
-    //   alert('Failed to update task. Please try again.');
-    // } finally {
-    //   setIsTaskUpdating(false);
-    // }
+    try {
+      setIsTaskUpdating(true);
+      const updatedTask = await updateTask(taskId, data);
+
+      // Update tasks in state
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
+      );
+
+      // Close modal and update selected task
+      setIsEditModalOpen(false);
+      setSelectedTask(updatedTask);
+      // setRefetch(true)
+      fetchTasks()
+      setNoti("Task has updated successfully")
+    } catch (err) {
+      console.error('Failed to update task:', err);
+      setError('Failed to update task. Please try again.');
+    } finally {
+      setIsTaskUpdating(false);
+    }
   };
 
   const handleTaskCreate = async (
-    data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, startDate: Date, endDate: Date }
+    data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, start_date: Date | string, end_date: Date | string, assigned_to_id: string }
   ) => {
-    // try {
-    //   setIsTaskUpdating(true);
-    //   const updatedTask = await updateTask(taskId, data);
-      
-    //   // Update tasks in state
-    //   setTasks((prevTasks) =>
-    //     prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
-    //   );
-      
-    //   // Close modal and update selected task
-    //   setIsEditModalOpen(false);
-    //   setSelectedTask(updatedTask);
-    // } catch (err) {
-    //   console.error('Failed to update task:', err);
-    //   alert('Failed to update task. Please try again.');
-    // } finally {
-    //   setIsTaskUpdating(false);
-    // }
+    try {
+      setIsTaskCreating(true);
+      console.log(data)
+      const updatedTask = await createTask(data);
+
+      // Close modal and update selected task
+      setIsCreateModalOpen(false);
+      setSelectedTask(updatedTask);
+      setNoti("Task has created successfully")
+      // setRefetch(true)
+      fetchTasks()
+    } catch (err) {
+      console.error('Failed to create task:', err);
+      setError("Failed to create task. Please try again")
+    } finally {
+      setIsTaskCreating(false);
+    }
   };
 
   // Handle drag and drop
@@ -131,8 +176,14 @@ const Home = () => {
     try {
       // Find the task
       const taskToUpdate = tasks.find((task) => task.id === taskId);
+      
       if (!taskToUpdate || taskToUpdate.status === newStatus) return;
 
+      if(taskToUpdate?.assigned_to?.id != authState.user?.id && taskToUpdate?.owned_by.id != authState.user?.id) {
+        setError("You need to be assigned to or owned the task to update")
+        return
+      }
+      
       // Optimistically update UI
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
@@ -141,37 +192,69 @@ const Home = () => {
       );
 
       // Update on server
-      // await updateTask(taskId, { status: newStatus });
+      await updateTask(taskId, { status: newStatus });
+      setNoti("Task status has successfully updated");
+      fetchTasks()
     } catch (err) {
       console.error('Failed to update task status:', err);
-      alert('Failed to move task. Please try again.');
-      
+      setError('Failed to move task. Please try again.');
       // Revert the optimistic update on failure
       setTasks((prevTasks) => [...prevTasks]);
+      // setRefetch(true)
     }
   };
 
   // Placeholder for creating a new task
   const handleCreateTask = () => {
-    setIsCreatingTask(true);
     setIsCreateModalOpen(true)
-    // In a real app, this would open a modal with a form
-    // alert('Task creation would be implemented in a real application');
-    // setIsCreatingTask(false);
   };
+  
+  useEffect(() => {
+    if(JSON.stringify(filters) !== JSON.stringify(previousFilter.current)) {
+      fetchTasks(filters);
+      previousFilter.current = {...filters};
+    }
+  }, [filters]);
+
+  useEffect(() => {
+    if (error) {
+      const timeoutId = setTimeout(() => {
+        setError('');
+      }, 10000);
+
+      return () => clearTimeout(timeoutId);
+    }
+    if (noti) {
+      const timeoutId = setTimeout(() => {
+        setNoti('');
+      }, 10000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [noti, error]);
+
 
   return (
     <MainLayout requireAuth>
       <div className="mb-6 flex flex-wrap justify-between items-center">
-        <h1 className="text-2xl font-bold">Task Management</h1>
-        <Button onClick={handleCreateTask} disabled={isCreatingTask}>
-          {isCreatingTask ? 'Creating...' : 'Create New Task'}
+        <h1 className="text-2xl font-bold">Task Board</h1>
+        <Button onClick={handleCreateTask}>
+          Create New Task
         </Button>
       </div>
+      <TaskFilter
+        users={users}
+        onFilterChange={handleFilterChange}
+      />
 
       {error && (
         <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
           {error}
+        </div>
+      )}
+      {noti && (
+        <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-md">
+          {noti}
         </div>
       )}
 
@@ -211,8 +294,7 @@ const Home = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onEdit={handleEditClick}
-        // currentUserId={authState.user?.id}
-        currentUserId={"2"}
+        currentUserId={authState.user?.id}
       />
 
       {/* Task edit modal */}
@@ -222,13 +304,15 @@ const Home = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleTaskUpdate}
         isLoading={isTaskUpdating}
+        users={users}
       />
 
       <TaskCreateForm
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={handleTaskCreate}
-        isLoading={isTaskUpdating}
+        isLoading={isTaskCreating}
+        users={users}
       />
     </MainLayout>
   );

@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-// import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import Button from '../UI/Button';
 import { useState } from 'react';
 
 const Header = () => {
-  // const { authState, logout } = useAuth();
+  const { authState, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
@@ -15,7 +15,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    // logout();
+    logout();
     navigate('/login');
   };
 
@@ -38,7 +38,7 @@ const Header = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="ml-2 text-xl font-semibold">TaskManager</span>
+              <span className="ml-2 text-xl font-semibold">Taskflow</span>
             </Link>
             
             {/* Environment indicator */}
@@ -51,7 +51,7 @@ const Header = () => {
 
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center space-x-4">
-            {/* {authState.isAuthenticated ? ( */}
+            {authState.isAuthenticated ? (
               <>
                 <Link
                   to="/"
@@ -69,10 +69,10 @@ const Header = () => {
                   Logout
                 </Button>
                 <div className="ml-2 text-sm text-gray-600">
-                  {/* {authState.user?.firstName} {authState.user?.lastName} */}
+                  {authState.user?.first_name} {authState.user?.last_name}
                 </div>
               </>
-            {/* ) : ( */}
+             ) : ( 
               <>
                 <Link
                   to="/login"
@@ -84,7 +84,7 @@ const Header = () => {
                   <Button>Register</Button>
                 </Link>
               </>
-            {/* )} */}
+           )} 
           </nav>
 
           {/* Mobile menu button */}
@@ -123,7 +123,7 @@ const Header = () => {
         {/* Mobile navigation */}
         {isMenuOpen && (
           <div className="md:hidden pb-4">
-            {/* {authState.isAuthenticated ? ( */}
+            {authState.isAuthenticated ? (
               <>
                 <Link
                   to="/"
@@ -148,7 +148,7 @@ const Header = () => {
                   </Button>
                 </div>
               </>
-            {/* ) : ( */}
+           ) : ( 
               <>
                 <Link
                   to="/login"
@@ -163,7 +163,7 @@ const Header = () => {
                   </Link>
                 </div>
               </>
-            {/* )} */}
+          )} 
           </div>
         )}
       </div>

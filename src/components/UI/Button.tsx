@@ -35,7 +35,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyles} ${variantStyles[variant]} ${widthClass} ${disabledClass} ${className}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${widthClass} ${disabledClass} ${className} cursor-pointer`}
     >
       {children}
     </button>

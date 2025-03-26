@@ -38,19 +38,19 @@ const TaskDetail = ({
     }
   };
 
-    // Priority icon mapping
+  // Priority icon mapping
   const getPriorityIcon = (priority: Task['priority']) => {
     switch (priority) {
       case 'LOW':
         return <FaGripLines />
       case 'MEDIUM':
-        return <RiArrowUpSLine color='orange'/>; // Single up arrow for medium
+        return <RiArrowUpSLine color='orange' />; // Single up arrow for medium
       case 'HIGH':
-        return <RiArrowUpDoubleLine color='red'/>; // Dash for low priority
+        return <RiArrowUpDoubleLine color='red' />; // Dash for low priority
     }
   };
 
-    // Priority color mapping
+  // Priority color mapping
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
       case 'LOW':
@@ -67,34 +67,44 @@ const TaskDetail = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={task.title}>
       <div className="space-y-4">
-         {/* Priority and Status */}
-      <div className="flex justify-between items-center text-xs">
-        {/* Priority */}
-        <span
-          className={`flex items-center gap-1 px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}
-        >
-          {task.priority ? task.priority.toUpperCase() : 'N/A'}
-          {getPriorityIcon(task.priority)}
-        </span>
+        {/* Priority and Status */}
+        <div className="flex justify-between items-center text-xs">
+          {/* Priority */}
+          <span
+            className={`flex items-center gap-1 px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}
+          >
+            {task.priority === 'LOW'
+              ? 'LOW'
+              : task.priority === 'MEDIUM'
+                ? 'MEDIUM'
+                : 'HIGH'}
+            {/* {task.priority ? task.priority.toUpperCase() : 'N/A'} */}
+            {getPriorityIcon(task.priority)}
+          </span>
 
-        {/* Status */}
-        <span
-          className={`px-2 py-1 rounded-full ${getStatusBadgeClass()}`}
-        >
-          {task.status === 'TODO'
-            ? 'TO DO'
-            : task.status === 'IN_PROGRESS'
-            ? 'IN_PROGRESS'
-            : 'DONE'}
-        </span>
-      </div>
+          {/* Status */}
+          <span
+            className={`px-2 py-1 rounded-full ${getStatusBadgeClass()}`}
+          >
+            {task.status === 'TODO'
+              ? 'TO DO'
+              : task.status === 'IN_PROGRESS'
+                ? 'IN PROGRESS'
+                : 'DONE'}
+          </span>
+        </div>
         <div className="p-4 bg-gray-50 rounded-md whitespace-pre-wrap">
           {task.description}
         </div>
 
         <div className="text-sm text-gray-600">
-          <p>Start Date: {task.start_date}</p>
-          <p>End Date: {task.end_date}</p>
+          <p>Start Date: {task.start_date || "Not set"}</p>
+          <p>End Date: {task.end_date || "Not set"}</p>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          <p>Assigned to: {task.assigned_by?.first_name ? `${task.assigned_by.first_name} ${task.assigned_by.last_name}` : 'Not assigned'} </p>
+          <p>Owned by: {task.owned_by?.first_name ? `${task.owned_by.first_name} ${task.owned_by.last_name}` : 'Not assigned'} </p>
         </div>
 
         <div className="flex justify-between items-center pt-4 border-t">

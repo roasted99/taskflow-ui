@@ -1,7 +1,7 @@
 import { User } from "./auth";
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
-export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 
 export interface Task {
   id: string;
@@ -14,7 +14,7 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
   owned_by: User;
-  assigned_by?: User;
+  assigned_to?: User;
 }
 
 export interface CreateTaskData {
@@ -22,8 +22,9 @@ export interface CreateTaskData {
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
-  start_date: string;
-  end_date: string;
+  start_date: Date | string;
+  end_date: Date | string;
+  assigned_to_id: string;
 }
 
 export interface UpdateTaskData {
@@ -31,6 +32,7 @@ export interface UpdateTaskData {
   description?: string;
   status?: TaskStatus;
   priority?: TaskPriority;
-  start_date?: string;
-  end_date?: string;
+  start_date?: string | Date;
+  end_date?: string | Date;
+  assigned_to_id?: string;
 }

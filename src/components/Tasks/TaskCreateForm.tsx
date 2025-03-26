@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Task, TaskPriority, TaskStatus } from '../../types/task';
+import { useState } from 'react';
+import { TaskPriority, TaskStatus } from '../../types/task';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
+import { User } from '../../types/auth';
 
 interface TaskCreateFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (data: { title: string; description: string; status: TaskStatus , priority: TaskPriority, startDate: Date | null, endDate: Date | null}) => void;
+  onCreate: (data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, start_date: Date | string, end_date: Date | string, assigned_to_id: string }) => void;
   isLoading: boolean;
+  users: User[]
 }
 
 const TaskCreateForm = ({
@@ -15,30 +17,17 @@ const TaskCreateForm = ({
   onClose,
   onCreate,
   isLoading,
+  users
 }: TaskCreateFormProps) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 'TODO' as TaskStatus,
     priority: 'MEDIUM' as TaskPriority,
-    startDate: null,
-    endDate: null
-
+    start_date: '',
+    end_date: '',
+    assigned_to_id: ''
   });
-
-  // Update form data when task changes
-  // useEffect(() => {
-  //   if (task) {
-  //     setFormData({
-  //       title: task.title,
-  //       description: task.description,
-  //       status: task.status,
-  //       priority: task.priority,
-  //       startDate: task.start_date,
-  //       endDate: task.end_date
-  //     });
-  //   }
-  // }, [task]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -51,6 +40,15 @@ const TaskCreateForm = ({
     e.preventDefault();
     if (formData) {
       onCreate(formData);
+      setFormData({
+        title: '',
+        description: '',
+        status: 'TODO' as TaskStatus,
+        priority: 'MEDIUM' as TaskPriority,
+        start_date: '',
+        end_date: '',
+        assigned_to_id: ''
+      })
     }
   };
 
@@ -142,14 +140,14 @@ const TaskCreateForm = ({
             >
               Start Date
             </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 />
+            <input
+              type="date"
+              id="startDate"
+              name="start_date"
+              value={formData.start_date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           <div>
@@ -159,14 +157,34 @@ const TaskCreateForm = ({
             >
               End Date
             </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 />
+            <input
+              type="date"
+              id="endDate"
+              name="end_date"
+              value={formData.end_date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label 
+            htmlFor="assignedTo"
+            className='w-full px-3 py-2 block text-smgg font-medium text-gray-700 mb-1'
+            >
+              Assigned to
+            </label>
+            <select
+              value={formData.assigned_to_id}
+              onChange={handleChange}
+              name='assigned_to_id'
+              className="border rounded p-2 flex-grow"
+            >
+              <option value="">Not assigned</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.first_name} {user.last_name}</option>
+                ))}
+            </select>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

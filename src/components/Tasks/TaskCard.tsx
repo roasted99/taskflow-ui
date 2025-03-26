@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Task } from '../../types/task';
+import { Task, } from '../../types/task';
 import { RiArrowUpDoubleLine } from "react-icons/ri";
 import { RiArrowUpSLine } from "react-icons/ri";
 import { FaGripLines } from "react-icons/fa6";
@@ -73,12 +73,12 @@ const TaskCard = ({ task, onClick, onDragStart }: TaskCardProps) => {
     >
       {/* Title */}
       <h3 className="font-semibold text-lg text-gray-800 mb-2">
-        {task.title || 'Untitled Task'}
+        {task?.title || 'Untitled Task'}
       </h3>
 
       {/* Description */}
       <p className="text-gray-600 text-sm mb-3">
-        {truncateText(task.description, 100)}
+        {task.description ? truncateText(task.description, 100) : ''}
       </p>
 
       {/* Priority and Status */}
@@ -87,20 +87,29 @@ const TaskCard = ({ task, onClick, onDragStart }: TaskCardProps) => {
         <span
           className={`flex items-center gap-1 px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}
         >
-          {task.priority ? task.priority.toUpperCase() : 'N/A'}
-          {getPriorityIcon(task.priority)}
+        {task.priority === 'LOW'
+          ? 'LOW'
+          : task.priority === 'MEDIUM'
+          ? 'MEDIUM'
+          : 'HIGH'}
+          {getPriorityIcon(task?.priority)}
         </span>
 
         {/* Status */}
         <span
           className={`px-2 py-1 rounded-full ${getStatusColor(task.status)}`}
-        >
+          >
           {task.status === 'TODO'
             ? 'TO DO'
             : task.status === 'IN_PROGRESS'
-            ? 'IN_PROGRESS'
+            ? 'IN PROGRESS'
             : 'DONE'}
         </span>
+      </div>
+
+      <div className='text-gray-600 text-sm mb-3 mt-2'>
+        <p>Assigned to: {task.assigned_to?.first_name ? `${task.assigned_to.first_name} ${task.assigned_to.last_name}` : 'Not assigned'} </p>
+        <p>Owned by: {task.owned_by?.first_name ? `${task.owned_by.first_name} ${task.owned_by.last_name}` : 'Not assigned'} </p>
       </div>
 
     </div>

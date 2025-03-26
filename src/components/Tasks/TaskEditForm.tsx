@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { Task, TaskPriority, TaskStatus } from '../../types/task';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
+import { User } from '../../types/auth';
 
 interface TaskEditFormProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (taskId: string, data: { title: string; description: string; status: TaskStatus }) => void;
+  onSave: (taskId: string, data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, start_date: Date | string, end_date: Date | string, assigned_to_id: string }) => void;
   isLoading: boolean;
+  users: User[];
 }
 
 const TaskEditForm = ({
@@ -17,15 +19,16 @@ const TaskEditForm = ({
   onClose,
   onSave,
   isLoading,
+  users
 }: TaskEditFormProps) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 'TODO' as TaskStatus,
     priority: 'MEDIUM' as TaskPriority,
-    startDate: '',
-    endDate: ''
-
+    start_date: '',
+    end_date: '',
+    assigned_to_id: ''
   });
 
   // Update form data when task changes
@@ -36,8 +39,9 @@ const TaskEditForm = ({
         description: task.description,
         status: task.status,
         priority: task.priority,
-        startDate: task.start_date,
-        endDate: task.end_date
+        start_date: task.start_date,
+        end_date: task.end_date,
+        assigned_to_id: task.assigned_to?.id || '' 
       });
     }
   }, [task]);
@@ -149,7 +153,7 @@ const TaskEditForm = ({
                   type="date"
                   id="startDate"
                   name="startDate"
-                  value={formData.startDate}
+                  value={formData.start_date}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                  />
@@ -166,12 +170,30 @@ const TaskEditForm = ({
                   type="date"
                   id="endDate"
                   name="endDate"
-                  value={formData.endDate}
+                  value={formData.end_date}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                  />
           </div>
-
+          <div>
+            <label 
+            htmlFor="assignedTo"
+            className='block text-smgg font-medium text-gray-700 mb-1'
+            >
+              Assigned to
+            </label>
+            <select
+              value={formData.assigned_to_id}
+              onChange={handleChange}
+              name='assigned_to_id'
+              className="w-full px-3 py-2 border rounded p-2 flex-grow"
+            >
+              <option value="">Not assigned</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.first_name} {user.last_name}</option>
+                ))}
+            </select>
+          </div>
           <div className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
