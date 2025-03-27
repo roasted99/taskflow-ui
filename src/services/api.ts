@@ -3,12 +3,10 @@ import { getToken } from '../utils/localStorage';
 import { clearStorage } from '../utils/localStorage';
 
 // Create an environment variable for switching between dev and production
-const isDev = import.meta.env.MODE === 'development';
+// const isDev = import.meta.env.MODE === 'development';
 
 // Base URL based on environment
-const baseURL = isDev 
-  ? 'http://localhost:5000/api' 
-  : 'https://taskflow-pp21.onrender.com/api';
+const baseURL = 'https://taskflow-pp21.onrender.com/api';
 
 const api = axios.create({
   baseURL,
