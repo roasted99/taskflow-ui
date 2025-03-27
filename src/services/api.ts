@@ -8,7 +8,7 @@ const isDev = import.meta.env.MODE === 'development';
 // Base URL based on environment
 const baseURL = isDev 
   ? 'http://localhost:5000/api' 
-  : 'https://production-api.example.com/api';
+  : import.meta.env.API_BASE_URL;
 
 const api = axios.create({
   baseURL,
