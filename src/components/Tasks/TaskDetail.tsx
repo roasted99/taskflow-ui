@@ -22,7 +22,7 @@ const TaskDetail = ({
   if (!task) return null;
 
   // Check if the current user is the owner of the task
-  const isOwner = currentUserId === task.owned_by.id;
+  const isOwnerOrAssigned = currentUserId === task.owned_by.id || currentUserId === task.assigned_to?.id;
 
   // Get status badge class
   const getStatusBadgeClass = () => {
@@ -78,7 +78,6 @@ const TaskDetail = ({
               : task.priority === 'MEDIUM'
                 ? 'MEDIUM'
                 : 'HIGH'}
-            {/* {task.priority ? task.priority.toUpperCase() : 'N/A'} */}
             {getPriorityIcon(task.priority)}
           </span>
 
@@ -103,19 +102,16 @@ const TaskDetail = ({
         </div>
 
         <div className="text-sm text-gray-600">
-          <p>Assigned to: {task.assigned_by?.first_name ? `${task.assigned_by.first_name} ${task.assigned_by.last_name}` : 'Not assigned'} </p>
+          <p>Assigned to: {task.assigned_to?.first_name ? `${task.assigned_to.first_name} ${task.assigned_to.last_name}` : 'Not assigned'} </p>
           <p>Owned by: {task.owned_by?.first_name ? `${task.owned_by.first_name} ${task.owned_by.last_name}` : 'Not assigned'} </p>
         </div>
 
-        <div className="flex justify-between items-center pt-4 border-t">
-          {isOwner && (
-            <div className="text-xs text-green-600 font-medium">You own this task</div>
-          )}
+        <div className="flex justify-end items-center pt-4 border-t">
           <div className="ml-auto">
             <Button onClick={onClose} variant="secondary" className="mr-2">
               Close
             </Button>
-            {isOwner && (
+            {isOwnerOrAssigned && (
               <Button onClick={onEdit}>Edit Task</Button>
             )}
           </div>

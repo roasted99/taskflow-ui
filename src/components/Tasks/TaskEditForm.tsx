@@ -3,11 +3,13 @@ import { Task, TaskPriority, TaskStatus } from '../../types/task';
 import Button from '../UI/Button';
 import Modal from '../UI/Modal';
 import { User } from '../../types/auth';
+import { useAuth } from '../../context/useAuth';
 
 interface TaskEditFormProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  onDelete: (taskIid: string) => void;
   onSave: (taskId: string, data: { title: string; description: string; status: TaskStatus, priority: TaskPriority, start_date: Date | string, end_date: Date | string, assigned_to_id: string }) => void;
   isLoading: boolean;
   users: User[];
@@ -19,8 +21,10 @@ const TaskEditForm = ({
   onClose,
   onSave,
   isLoading,
-  users
-}: TaskEditFormProps) => {
+  users,
+  onDelete
+}: TaskEditFormProps) => { 
+  const { authState } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -41,7 +45,7 @@ const TaskEditForm = ({
         priority: task.priority,
         start_date: task.start_date,
         end_date: task.end_date,
-        assigned_to_id: task.assigned_to?.id || '' 
+        assigned_to_id: task.assigned_to?.id || ''
       });
     }
   }, [task]);
@@ -61,6 +65,7 @@ const TaskEditForm = ({
   };
 
   if (!task) return null;
+  const isOwner = authState.user?.id === task.owned_by.id;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Task">
@@ -149,14 +154,14 @@ const TaskEditForm = ({
             >
               Start Date
             </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  name="startDate"
-                  value={formData.start_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 />
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              value={formData.start_date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           <div>
@@ -166,19 +171,19 @@ const TaskEditForm = ({
             >
               End Date
             </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  name="endDate"
-                  value={formData.end_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 />
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              value={formData.end_date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
           <div>
-            <label 
-            htmlFor="assignedTo"
-            className='block text-smgg font-medium text-gray-700 mb-1'
+            <label
+              htmlFor="assignedTo"
+              className='block text-smgg font-medium text-gray-700 mb-1'
             >
               Assigned to
             </label>
@@ -189,23 +194,37 @@ const TaskEditForm = ({
               className="w-full px-3 py-2 border rounded p-2 flex-grow"
             >
               <option value="">Not assigned</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>{user.first_name} {user.last_name}</option>
-                ))}
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.first_name} {user.last_name}</option>
+              ))}
             </select>
           </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
+          <div className="flex items-center justify-between pt-4">
+            {isOwner && (
+            <div className="flex justify-start">
+              <Button
+                type="button"
+                variant="danger" 
+                onClick={() => onDelete(task.id)} 
+                disabled={isLoading}
+              >
+                Delete
+              </Button>
+            </div>
+            )}
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClose}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
           </div>
         </div>
       </form>

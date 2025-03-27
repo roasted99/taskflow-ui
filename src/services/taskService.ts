@@ -1,11 +1,6 @@
 import api from './api';
 import { CreateTaskData, Task, UpdateTaskData } from '../types/task';
 
-// export const getTasks = async (): Promise<Task[]> => {
-//   const response = await api.get('/v1/tasks');
-//   return response.data;
-// };
-
 export const getTask = async (id: string): Promise<Task> => {
   const response = await api.get(`/v1/tasks/${id}`);
   return response.data;
@@ -38,5 +33,5 @@ export const updateTask = async (id: string, data: UpdateTaskData): Promise<Task
 };
 
 export const deleteTask = async (id: string): Promise<void> => {
-  await api.delete(`/tasks/${id}`);
+  await api.delete(`/v1/tasks/${id}`);
 };

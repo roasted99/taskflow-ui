@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../utils/localStorage';
+import { clearStorage } from '../utils/localStorage';
 
 // Create an environment variable for switching between dev and production
 const isDev = import.meta.env.MODE === 'development';
@@ -26,6 +27,18 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or unauthorized
+      clearStorage();
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

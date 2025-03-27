@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import Button from '../UI/Button';
 import { useState } from 'react';
 
@@ -53,6 +53,9 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-4">
             {authState.isAuthenticated ? (
               <>
+                <div className="ml-2 text-sm text-gray-600">
+                  {authState.user?.first_name} {authState.user?.last_name}
+                </div>
                 <Link
                   to="/"
                   className="px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100"
@@ -60,17 +63,14 @@ const Header = () => {
                   Home
                 </Link>
                 <Link
-                  to="/profile"
+                  to="/schedule"
                   className="px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100"
                 >
-                  Profile
+                  Schedule
                 </Link>
                 <Button variant="secondary" onClick={handleLogout}>
                   Logout
                 </Button>
-                <div className="ml-2 text-sm text-gray-600">
-                  {authState.user?.first_name} {authState.user?.last_name}
-                </div>
               </>
              ) : ( 
               <>
@@ -125,6 +125,9 @@ const Header = () => {
           <div className="md:hidden pb-4">
             {authState.isAuthenticated ? (
               <>
+                <div className="mt-2 px-3 py-2 text-sm text-gray-600">
+                  {authState.user?.first_name} {authState.user?.last_name}
+                </div>
                 <Link
                   to="/"
                   className="block px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100"
@@ -133,15 +136,12 @@ const Header = () => {
                   Home
                 </Link>
                 <Link
-                  to="/profile"
+                  to="/schedule"
                   className="block px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Profile
+                  Schedule
                 </Link>
-                <div className="mt-2 px-3 py-2 text-sm text-gray-600">
-                  {/* {authState.user?.firstName} {authState.user?.lastName} */}
-                </div>
                 <div className="mt-2">
                   <Button variant="secondary" onClick={handleLogout} fullWidth>
                     Logout

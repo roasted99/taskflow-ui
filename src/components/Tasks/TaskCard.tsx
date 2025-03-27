@@ -24,9 +24,9 @@ const TaskCard = ({ task, onClick, onDragStart }: TaskCardProps) => {
       case 'LOW':
         return <FaGripLines />
       case 'MEDIUM':
-        return <RiArrowUpSLine color='orange'/>; // Single up arrow for medium
+        return <RiArrowUpSLine color='orange'/>; 
       case 'HIGH':
-        return <RiArrowUpDoubleLine color='red'/>; // Dash for low priority
+        return <RiArrowUpDoubleLine color='red'/>; 
     }
   };
 

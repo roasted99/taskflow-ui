@@ -4,8 +4,8 @@ import TaskColumn from '../components/Tasks/TaskColumn';
 import TaskDetail from '../components/Tasks/TaskDetail.tsx';
 import TaskEditForm from '../components/Tasks/TaskEditForm';
 import { Task, TaskStatus, TaskPriority } from '../types/task';
-import { useAuth } from '../context/AuthContext';
-import { getTasks, updateTask, createTask } from '../services/taskService';
+import { useAuth } from '../context/useAuth.ts';
+import { getTasks, updateTask, createTask, deleteTask } from '../services/taskService';
 import Button from '../components/UI/Button';
 import TaskCreateForm from '../components/Tasks/TaskCreateForm.tsx';
 import { User } from '../types/auth.ts';
@@ -19,7 +19,6 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [noti, setNoti] = useState<string | null>(null);
-  const [refetch, setRefetch] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -39,7 +38,6 @@ const Home = () => {
     priority?: TaskPriority | string;
     owned_by_id?: string;
     assigned_to?: string;
-    // date_range?: string
     start_date?: string;
     end_date?: string;
   }>(null);
@@ -49,22 +47,19 @@ const Home = () => {
       setIsLoading(true);
       setError(null);
       const filterParam: Record<string, any> = {};
-      for(const key in filters) {
-        if(filters[key] !== undefined && filters[key] !== null && filters[key] !== ""){
-            filterParam[key] = filters[key];
+      for (const key in filters) {
+        if (filters[key] !== undefined && filters[key] !== null && filters[key] !== "") {
+          filterParam[key] = filters[key];
 
         }
       }
-      if(filterParam.hasOwnProperty('start_date') && filterParam.hasOwnProperty('end_date')) {
+      if (filterParam.hasOwnProperty('start_date') && filterParam.hasOwnProperty('end_date')) {
         filterParam['date_range'] = filterParam['start_date'] + ',' + filterParam['end_date']
         delete filterParam['start_date'];
         delete filterParam['end_date'];
       }
-      // if(filters){
-      //   getTasks(filters)
-      // } else {
+
       const tasksData = await getTasks(filterParam);
-      // }
 
       setTasks(tasksData);
     } catch (err) {
@@ -86,14 +81,8 @@ const Home = () => {
   };
   // Fetch tasks on component mount
   useEffect(() => {
-    // Initial fetch
     fetchUsers();
-    // if(refetch){
-    //   fetchTasks()
-    //   setRefetch(false)
-    // } else {
-      fetchTasks();
-    // }
+    fetchTasks();
   }, []);
 
   // Filter tasks by status
@@ -114,7 +103,6 @@ const Home = () => {
   };
 
   const handleFilterChange = (filterKey: string, filterValue: string) => {
-    // setFilters(newFilters);
     setFilters((prevFilter) => ({
       ...prevFilter,
       [filterKey]: filterValue
@@ -130,17 +118,17 @@ const Home = () => {
       setIsTaskUpdating(true);
       const updatedTask = await updateTask(taskId, data);
 
-      // Update tasks in state
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
+      // Update tasks 
+      updateTask(taskId, data).then((res) => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) => (task.id === taskId ? res : task))
       );
-
-      // Close modal and update selected task
       setIsEditModalOpen(false);
       setSelectedTask(updatedTask);
-      // setRefetch(true)
-      fetchTasks()
       setNoti("Task has updated successfully")
+      fetchTasks()
+        
+      })
     } catch (err) {
       console.error('Failed to update task:', err);
       setError('Failed to update task. Please try again.');
@@ -154,15 +142,13 @@ const Home = () => {
   ) => {
     try {
       setIsTaskCreating(true);
-      console.log(data)
-      const updatedTask = await createTask(data);
-
       // Close modal and update selected task
-      setIsCreateModalOpen(false);
-      setSelectedTask(updatedTask);
       setNoti("Task has created successfully")
-      // setRefetch(true)
-      fetchTasks()
+      createTask(data).then(() => {
+        setIsCreateModalOpen(false);
+        setNoti("Task has successfully deleted")
+        fetchTasks()
+      })
     } catch (err) {
       console.error('Failed to create task:', err);
       setError("Failed to create task. Please try again")
@@ -176,14 +162,14 @@ const Home = () => {
     try {
       // Find the task
       const taskToUpdate = tasks.find((task) => task.id === taskId);
-      
+
       if (!taskToUpdate || taskToUpdate.status === newStatus) return;
 
-      if(taskToUpdate?.assigned_to?.id != authState.user?.id && taskToUpdate?.owned_by.id != authState.user?.id) {
+      if (taskToUpdate?.assigned_to?.id != authState.user?.id && taskToUpdate?.owned_by.id != authState.user?.id) {
         setError("You need to be assigned to or owned the task to update")
         return
       }
-      
+
       // Optimistically update UI
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
@@ -192,15 +178,15 @@ const Home = () => {
       );
 
       // Update on server
-      await updateTask(taskId, { status: newStatus });
-      setNoti("Task status has successfully updated");
-      fetchTasks()
+      updateTask(taskId, { status: newStatus }).then(() => {
+        setNoti("Task status has successfully updated");
+        fetchTasks()
+      });
     } catch (err) {
       console.error('Failed to update task status:', err);
       setError('Failed to move task. Please try again.');
       // Revert the optimistic update on failure
       setTasks((prevTasks) => [...prevTasks]);
-      // setRefetch(true)
     }
   };
 
@@ -208,11 +194,24 @@ const Home = () => {
   const handleCreateTask = () => {
     setIsCreateModalOpen(true)
   };
-  
+
+  const handleTaskDelete = async (taskId: string) => {
+    try {
+      setIsEditModalOpen(false);
+      deleteTask(taskId).then(() => {
+        setNoti("Task has successfully deleted")
+        fetchTasks()
+      })
+    } catch (error) {
+      console.error(error)
+      setError("Cannot delete task. Please try again.")
+    }
+  }
+
   useEffect(() => {
-    if(JSON.stringify(filters) !== JSON.stringify(previousFilter.current)) {
+    if (JSON.stringify(filters) !== JSON.stringify(previousFilter.current)) {
       fetchTasks(filters);
-      previousFilter.current = {...filters};
+      previousFilter.current = { ...filters };
     }
   }, [filters]);
 
@@ -305,6 +304,7 @@ const Home = () => {
         onSave={handleTaskUpdate}
         isLoading={isTaskUpdating}
         users={users}
+        onDelete={handleTaskDelete}
       />
 
       <TaskCreateForm

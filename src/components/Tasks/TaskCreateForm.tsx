@@ -89,7 +89,6 @@ const TaskCreateForm = ({
               onChange={handleChange}
               rows={6}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 
@@ -178,7 +177,7 @@ const TaskCreateForm = ({
               value={formData.assigned_to_id}
               onChange={handleChange}
               name='assigned_to_id'
-              className="border rounded p-2 flex-grow"
+              className="w-full border rounded p-2 flex-grow"
             >
               <option value="">Not assigned</option>
                 {users.map(user => (

@@ -1,6 +1,6 @@
 import RegisterForm from '../components/Auth/RegisterForm';
 import MainLayout from '../components/Layout/MainLayout';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth'; 
 import { Navigate } from 'react-router-dom';
 
 const Register = () => {
