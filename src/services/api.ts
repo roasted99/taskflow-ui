@@ -6,7 +6,7 @@ import { clearStorage } from '../utils/localStorage';
 const isDev = import.meta.env.MODE === 'development';
 
 // Base URL based on environment
-const baseURL = isDev ? 'http://localhost:5000/api' : import.meta.env.API_BASEE_URI;
+const baseURL = isDev ? 'http://localhost:5000/api' : import.meta.env.API_BASE_URI;
 // const baseURL = 'http://localhost:5000/api';
 
 const api = axios.create({
