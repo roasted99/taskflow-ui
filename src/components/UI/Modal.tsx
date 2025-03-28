@@ -15,7 +15,7 @@ const Modal = ({
   children,
   size = 'md',
 }: ModalProps) => {
-    const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   // Close modal on escape key press
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -24,9 +24,7 @@ const Modal = ({
       }
     };
 
-        // Handle click outside the modal
     const handleClickOutside = (e: MouseEvent) => {
-      // Check if the click is outside the modal content
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
         onClose();
       }
@@ -35,14 +33,11 @@ const Modal = ({
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.addEventListener('mousedown', handleClickOutside);
-      // Prevent scrolling when modal is open
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'visible';
     };
   }, [isOpen, onClose]);
 
@@ -56,8 +51,8 @@ const Modal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-500/50">
-      <div ref={modalRef} className={`${sizeClasses[size]} w-full bg-white rounded-lg shadow-lg`}>
-        <div className="flex items-center justify-between p-4 border-b">
+      <div ref={modalRef} className={`${sizeClasses[size]} w-full max-h-[90vh] bg-white rounded-lg shadow-lg flex flex-col`}>
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button
             onClick={onClose}
@@ -77,7 +72,7 @@ const Modal = ({
             </svg>
           </button>
         </div>
-        <div className="p-4">{children}</div>
+        <div className="p-4 overflow-y-auto flex-grow">{children}</div>
       </div>
     </div>
   );
