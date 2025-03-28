@@ -103,7 +103,6 @@ const TaskEditForm = ({
               onChange={handleChange}
               rows={6}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
 
@@ -157,7 +156,7 @@ const TaskEditForm = ({
             <input
               type="date"
               id="startDate"
-              name="startDate"
+              name="start_date"
               value={formData.start_date}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -174,7 +173,7 @@ const TaskEditForm = ({
             <input
               type="date"
               id="endDate"
-              name="endDate"
+              name="end_date"
               value={formData.end_date}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
