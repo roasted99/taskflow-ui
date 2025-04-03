@@ -56,7 +56,7 @@ const RegisterForm = () => {
             </label>
             <input
               id="firstName"
-              name="firstName"
+              name="first_name"
               type="text"
               value={formData.first_name}
               onChange={handleChange}
@@ -71,7 +71,7 @@ const RegisterForm = () => {
             </label>
             <input
               id="lastName"
-              name="lastName"
+              name="last_name"
               type="text"
               value={formData.last_name}
               onChange={handleChange}
